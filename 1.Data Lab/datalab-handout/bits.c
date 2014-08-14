@@ -139,7 +139,7 @@ NOTES:
  *   Rating: 1
  */
 int bitAnd(int x, int y) {
-  return 2;
+  return ~(~x|~y);
 }
 /* 
  * getByte - Extract byte n from word x
@@ -150,14 +150,9 @@ int bitAnd(int x, int y) {
  *   Rating: 2
  */
 int getByte(int x, int n) {
-
-
-
-
-
-
-
-  return 2;
+	int tem = x >> (n << 3);
+	int result = tem & 0xff;
+  return result;
 
 }
 /* 
@@ -169,7 +164,11 @@ int getByte(int x, int n) {
  *   Rating: 3 
  */
 int logicalShift(int x, int n) {
-  return 2;
+	/*I shift the bit value 1000... arthmeticly to build a fliter
+	 use the fliter to trasfer the new bit to 0*/
+	int t = 0x80000000 >> n << 1;
+	int result = x & ~t;
+  return result;
 }
 /*
  * bitCount - returns count of number of 1's in word
