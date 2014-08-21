@@ -166,7 +166,7 @@ int getByte(int x, int n) {
 int logicalShift(int x, int n) {
 	/*I shift the bit value 1000... arthmeticly to build a fliter
 	 use the fliter to trasfer the new bit to 0*/
-	int t = 0x80000000 >> n << 1;
+	int t = 0x1 << 31 >> n << 1;
 	int result = x & ~t;
   return result;
 }
@@ -178,6 +178,8 @@ int logicalShift(int x, int n) {
  *   Rating: 4
  */
 int bitCount(int x) {
+	/**/
+
   return 2;
 }
 /* 
@@ -188,7 +190,15 @@ int bitCount(int x) {
  *   Rating: 4 
  */
 int bang(int x) {
-  return 2;
+	/*
+	int t1 = (x >> 16) | x;
+	int t2 = (t1 >> 8) | t1;
+	int t3 = (t2 >> 4) | t2;
+	int t4 = (t3 >> 2) | t3;
+	int t5 = (t4 >> 1) | t4;
+  return ~(t5 & 0x1);
+  */
+	return ~((((~x + 1) | x) >> 31) & 0x1);
 }
 /* 
  * tmin - return minimum two's complement integer 
@@ -197,7 +207,7 @@ int bang(int x) {
  *   Rating: 1
  */
 int tmin(void) {
-  return 2;
+  return 0x1 << 31;
 }
 /* 
  * fitsBits - return 1 if x can be represented as an 
@@ -209,7 +219,8 @@ int tmin(void) {
  *   Rating: 2
  */
 int fitsBits(int x, int n) {
-  return 2;
+	int y = x >> n;
+  return (!~y) & !y;
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
@@ -220,7 +231,7 @@ int fitsBits(int x, int n) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-    return 2;
+    return x >> n + 1 + ~(x >> 31);
 }
 /* 
  * negate - return -x 
@@ -230,7 +241,7 @@ int divpwr2(int x, int n) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+  return (~0x0) &  (~x);
 }
 /* 
  * isPositive - return 1 if x > 0, return 0 otherwise 
@@ -240,7 +251,7 @@ int negate(int x) {
  *   Rating: 3
  */
 int isPositive(int x) {
-  return 2;
+  return ~(x >> 31 | !x) & 0x1;
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
@@ -250,7 +261,7 @@ int isPositive(int x) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  return 2;
+  return ((x + ~y) >> 31) & 0x1 ;
 }
 /*
  * ilog2 - return floor(log base 2 of x), where x > 0
@@ -274,7 +285,14 @@ int ilog2(int x) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
- return 2;
+	unsigned c = 0x1 << 31;
+	unsigned t = uf ^ (c);
+
+	unsigned t1 = uf >> 23;
+	if(t1 & 0xff == t1 && (uf << 9 != 0))
+		t = uf;
+
+	return t;
 }
 /* 
  * float_i2f - Return bit-level equivalent of expression (float) x
@@ -286,7 +304,23 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
-  return 2;
+	int topOne = 0x1 << 31;
+	int y = x, z = 0, i = 0;
+	if(x == topOne)
+		return 0xcf << 24;
+	if(x < 0) {
+		x = ~x + 1;
+		z = topOne;
+	}
+
+	while(y != 0) {
+		i++;
+		y >>= 1;
+	}
+	if(i > 23)
+		x >>= (i - 23);
+	x |= ((i + (0x1 << 7) - 1) << 23);
+  return x | z;
 }
 /* 
  * float_twice - Return bit-level equivalent of expression 2*f for
@@ -300,5 +334,10 @@ unsigned float_i2f(int x) {
  *   Rating: 4
  */
 unsigned float_twice(unsigned uf) {
+	/*To be continued...*/
+	unsigned t1 = uf >> 23;
+	if(t1 & 0xff == t1 && (uf << 9 != 0))
+		t = uf;
+
   return 2;
 }
