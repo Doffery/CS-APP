@@ -1,0 +1,48 @@
+#sum.ys: Iteratively sum linked list elements
+#by Dong
+
+		.pos 0
+init:	irmovl	Stack,	%esp
+		irmovl	Stack,	%ebp
+		call main
+		halt
+
+# Sample linked list
+		.align 4
+ele1:
+		.long 0x00a
+		.long ele2
+ele2:
+		.long 0x0b0
+		.long ele3
+ele3:
+		.long 0xc00
+		.long 0
+
+Main:	pushl	%ebp
+		rrmovl	%esp,	%ebp
+		irmovl	ele1,	%eax
+		pushl	%eax
+		call	rsum_list
+		rrmovl	%ebp,	%esp
+		popl	%ebp
+		ret
+
+rsum_list:
+		pushl	%ebp
+		rrmovl	%esp,	%ebp
+		xorl	%eax,	%eax
+		mrmovl	8(%ebp),%ecx
+		mrmovl	(%ecx),	%esi
+		mrmovl	12(%ebp),%edx
+		andl	%edx,	%edx
+		je		End
+		addl	0x8,	%esp
+		call	rsum_list
+End:	addl	%esi,	%eax
+		rrmovl	%ebp,	%esp
+		popl	%ebp
+		ret
+
+		.pos 0x100
+Stack:
